@@ -87,12 +87,21 @@ section h3 {
 }
 
 .participants ul {
-  list-style-type: disc;
-  padding-left: 20px;
+  list-style-type: none;
+  padding-left: 0;
 }
 
 .participants li {
   color: #555;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.delete {
+  cursor: pointer;
+  color: red;
+  font-weight: bold;
 }
 
 #signup-form {
