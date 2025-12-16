@@ -1,50 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mergington High School Activities</title>
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <header>
-      <h1>Mergington High School</h1>
-      <h2>Extracurricular Activities</h2>
-    </header>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { text-align: center; color: #333; }
+        .activity-card { background: white; border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin: 10px 0; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .activity-card h2 { color: #007bff; margin-top: 0; }
+        .activity-card p { margin: 5px 0; }
+        .participants { margin-top: 15px; }
+        .participants ul { list-style-type: none; padding-left: 0; }
+        .participants li { color: #555; display: flex; justify-content: space-between; align-items: center; }
+        .delete { cursor: pointer; color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Mergington High School Extracurricular Activities</h1>
+        <div id="activities"></div>
+    </div>
+    <script>
+        async function loadActivities() {
+            try {
+                const response = await fetch('/activities');
+                const activities = await response.json();
+                const container = document.getElementById('activities');
+                for (const [name, details] of Object.entries(activities)) {
+                    const card = document.createElement('div');
+                    card.className = 'activity-card';
+                    card.innerHTML = `
+                        <h2>${name}</h2>
+                        <p><strong>Description:</strong> ${details.description}</p>
+                        <p><strong>Schedule:</strong> ${details.schedule}</p>
+                        <p><strong>Max Participants:</strong> ${details.max_participants}</p>
+                        <div class="participants">
+                            <strong>Participants:</strong>
+                            <ul>
+                                ${details.participants.length > 0 ? details.participants.map(p => `<li>${p} <span class="delete" onclick="unregister('${name}', '${p}')">×</span></li>`).join('') : '<li>No participants yet</li>'}
+                            </ul>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                }
+            } catch (error) {
+                console.error('Error loading activities:', error);
+            }
+        }
+        async function unregister(activityName, email) {
+            try {
+                const response = await fetch(`/activities/${encodeURIComponent(activityName)}/unregister?email=${encodeURIComponent(email)}`, { method: 'DELETE' });
+                if (response.ok) {
+                    loadActivities();
+                } else {
+                    alert('Error unregistering');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
 
-    <main>
-      <section id="activities-container">
-        <h3>Available Activities</h3>
-        <div id="activities-list">
-          <!-- Activities will be loaded here -->
-          <p>Loading activities...</p>
-        </div>
-      </section>
-
-      <section id="signup-container">
-        <h3>Sign Up for an Activity</h3>
-        <form id="signup-form">
-          <div class="form-group">
-            <label for="email">Student Email:</label>
-            <input type="email" id="email" required placeholder="your-email@mergington.edu" />
-          </div>
-          <div class="form-group">
-            <label for="activity">Select Activity:</label>
-            <select id="activity" required>
-              <option value="">-- Select an activity --</option>
-              <!-- Activity options will be loaded here -->
-            </select>
-          </div>
-          <button type="submit">Sign Up</button>
-        </form>
-        <div id="message" class="hidden"></div>
-      </section>
-    </main>
-
-    <footer>
-      <p>&copy; 2023 Mergington High School</p>
-    </footer>
-
-    <script src="app.js"></script>
-  </body>
+        loadActivities();
+    </script>
+</body>
 </html>
